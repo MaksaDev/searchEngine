@@ -1,13 +1,46 @@
 <?php
-
+include("config.php");
 include("classes/DomDocumentParser.php");
+
 
 $alreadyCrawled = array();
 $crawling = array();
 
 
 
-    function createLink($src, $url){
+function linkExist($url){
+
+    global $con;
+
+    $query = $con->prepare("SELECT * FROM sites WHERE url = :url");
+                           
+    $query->bindParam(":url", $url);
+    $query->execute();
+
+    return  ($query->rowCount() != 0) ;
+
+}
+
+
+    function insertLink($url, $title, $description, $keywords){
+
+        global $con;
+
+        $query = $con->prepare("INSERT INTO sites(url, title, description, keywords)
+                                VALUES(:url, :title, :description, :keywords) "); //placeholder
+
+        $query->bindParam(":url", $url);
+        $query->bindParam(":title", $title);
+        $query->bindParam(":description", $description);
+        $query->bindParam(":keywords", $keywords);
+
+        return $query->execute();
+    }
+
+
+
+
+function createLink($src, $url){
 
             $scheme = parse_url($url)["scheme"];  //  http
             $host = parse_url($url)["host"];  //  www....com
@@ -24,9 +57,7 @@ $crawling = array();
         return $src;
     }
 
-
-
-    function getDetails($url){
+function getDetails($url){
 
         $parser = new DomDocumentParser($url);
 
@@ -63,7 +94,19 @@ $crawling = array();
         $description = str_replace("\n", "",$description);
         $keywords = str_replace("\n", "",$keywords);
 
-        echo " ..$description <br>----$keywords ";
+
+        if(linkExist($url)){
+
+            echo"$url already exists<br>";
+        }
+        else if (insertLink($url, $title, $description, $keywords) ){
+            echo "SUCCESS: $url<br>";
+        }
+        else{
+            echo "ERROR: Failed to insert $url<br>";
+        }
+            
+        
 
 
     }
@@ -71,7 +114,7 @@ $crawling = array();
 
 
 
-    function followLinks($url){
+function followLinks($url){
 
         global $alreadyCrawled;
         global $crawling;
