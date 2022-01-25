@@ -26,6 +26,50 @@ $crawling = array();
 
 
 
+    function getDetails($url){
+
+        $parser = new DomDocumentParser($url);
+
+        $titleArray = $parser->getTitleTags();
+
+        if(sizeof($titleArray) == 0 || $titleArray->item(0) == NULL){
+            return;
+        }
+
+
+        $title = $titleArray->item(0)->nodeValue;
+        $title = str_replace("\n", "",$title);
+
+        if($title == ""){
+            return;
+        }
+
+        $description = "";
+        $keywords = "";
+
+        $metasArray = $parser->getMetaTags();
+
+        foreach($metasArray as $meta){
+            if ($meta->getAttribute("name") == "description" ){
+                $description = $meta->getAttribute("content");
+            }
+
+            if ($meta->getAttribute("name") == "keyword" ){
+                $keywords = $meta->getAttribute("content");
+            }
+
+        }
+
+        $description = str_replace("\n", "",$description);
+        $keywords = str_replace("\n", "",$keywords);
+
+        echo " ..$description <br>----$keywords ";
+
+
+    }
+
+
+
 
     function followLinks($url){
 
@@ -56,10 +100,11 @@ $crawling = array();
                 $crawling[] = $href;
 
 
-                //insert $href to db
+                getDetails($href);
             }
+            else return;
 
-            echo $href . "<br>";
+            
         }
 
 
