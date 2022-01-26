@@ -204,7 +204,7 @@ function followLinks($url){
 
     }
 
-$startUrl = "https://www.bbc.com/";
+$startUrl = "https://git-scm.com/";
 followLinks($startUrl);
 
 
