@@ -5,6 +5,7 @@ include("classes/DomDocumentParser.php");
 
 $alreadyCrawled = array();
 $crawling = array();
+$alreadyFoundImages = array();
 
 
 
@@ -22,7 +23,7 @@ function linkExist($url){
 }
 
 
-    function insertLink($url, $title, $description, $keywords){
+function insertLink($url, $title, $description, $keywords){
 
         global $con;
 
@@ -37,27 +38,51 @@ function linkExist($url){
         return $query->execute();
     }
 
+    function insertImage($url, $src, $alt, $title){
+
+        global $con;
+
+        $query = $con->prepare("INSERT INTO images(siteUrl, imageUrl, alt, title)
+                                VALUES(:siteUrl, :imageUrl, :alt, :title) "); //placeholder
+
+        $query->bindParam(":siteUrl", $url);
+        $query->bindParam(":imageUrl", $src);
+        $query->bindParam(":alt", $alt);
+        $query->bindParam(":title", $title);
+
+        $query->execute();
+    }
 
 
 
 function createLink($src, $url){
 
-            $scheme = parse_url($url)["scheme"];  //  http
-            $host = parse_url($url)["host"];  //  www....com
+        $scheme = parse_url($url)["scheme"];  //  http
+        $host = parse_url($url)["host"];  //  www....com
 
 
-        if(substr($src , 0, 2) == "//"){
-            $src = $scheme . ":" . $src;
-        }
-            else if (substr($src , 0, 1) == "/"){
-                $src = $scheme . "://" . $host . $src;
-
+        if(substr($src, 0, 2) == "//") {
+                $src =  $scheme . ":" . $src;
             }
-         
+        else if(substr($src, 0, 1) == "/") {
+                $src = $scheme . "://" . $host . $src;
+            }
+        else if(substr($src, 0, 2) == "./") {
+                $src = $scheme . "://" . $host . dirname(parse_url($url)["path"]) . substr($src, 1);
+            }
+        else if(substr($src, 0, 3) == "../") {
+                $src = $scheme . "://" . $host . "/" . $src;
+            }
+        else if(substr($src, 0, 5) != "https" && substr($src, 0, 4) != "http") {
+                $src = $scheme . "://" . $host . "/" . $src;
+            }
+        
         return $src;
     }
 
 function getDetails($url){
+
+        global $alreadyFoundImages;
 
         $parser = new DomDocumentParser($url);
 
@@ -106,6 +131,25 @@ function getDetails($url){
             echo "ERROR: Failed to insert $url<br>";
         }
             
+        $imageArray = $parser->getImages();
+        foreach($imageArray as $image){
+            $src = $image->getAttribute("src");
+            $alt = $image->getAttribute("alt");
+            $title = $image->getAttribute("title");
+
+            if(!$title && !$alt){
+                continue;
+            }
+
+            $src = createLink($src,$url);
+
+            if(!in_array($src, $alreadyFoundImages)){
+                $alreadyFoundImages[] = $src ;
+                insertImage($url,$src,$alt,$title);
+
+            }
+           
+        }
         
 
 
@@ -145,7 +189,7 @@ function followLinks($url){
 
                 getDetails($href);
             }
-            else return;
+            
 
             
         }
@@ -160,7 +204,7 @@ function followLinks($url){
 
     }
 
-$startUrl = "https://www.python.org/";
+$startUrl = "https://www.bbc.com/";
 followLinks($startUrl);
 
 
