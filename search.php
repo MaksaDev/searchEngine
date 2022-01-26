@@ -11,6 +11,7 @@ include("classes/SiteResultsProvider.php");
     }
 
     $type = isset($_GET["type"]) ? $_GET["type"] : 'sites' ;
+    $page = isset($_GET["page"]) ? $_GET["page"] : 1 ;
     
 
 ?>
@@ -44,7 +45,7 @@ include("classes/SiteResultsProvider.php");
                 <form action="search.php" method="GET">
                     <div class="searchBarContainer">
                         
-                        <input class="searchBox" type="text" name="term">
+                        <input class="searchBox" type="text" name="term" value="<?php echo $term?>">
 
                         <button class="searchButton">
                             <img src="assets/images/icons/slikaBTN.png" >
@@ -88,15 +89,69 @@ include("classes/SiteResultsProvider.php");
 
         <?php
             $resultsProvider = new SiteResultsProvider($con);
+            $pageSize = 20;
             
             $numResults = $resultsProvider->getNumResults($term);
 
             echo "<p class='resultsCount'>$numResults results found </p>";
 
-            echo $resultsProvider->getResultsHtml(1, 20, $term);
+            echo $resultsProvider->getResultsHtml($page , $pageSize, $term);
         ?>
 
     </div>
+
+
+
+    <div class="paginationContainer">
+
+    
+
+        <div class="pageButtons">
+
+            <?php 
+
+            $pagesToShow = 10;
+            $numPages =ceil($numResults / $pageSize)  ;//logika za listanje strana
+            $pagesLeft = min($pagesToShow, $numPages);
+
+            $currentPage = $page - floor($pagesToShow/2);
+            if($currentPage <1) {
+                $currentPage = 1;
+            }
+
+            if($currentPage + $pagesLeft > $numPages +1){
+                $currentPage = $numPages+1  - $pagesLeft;
+            }
+
+                
+
+                while($pagesLeft != 0 && $currentPage <= $numPages){
+
+                    
+
+                    
+                    echo "<div class='pageNumberContainer'>
+                        
+                         <a href='search.php?term=$term&type=$type&page=$currentPage'
+                         <span class='pageNumber'>$currentPage</span>
+
+                         </a>
+                         </div>";
+                        $currentPage++;
+                        $pagesLeft--;
+
+                }
+               
+            
+            ?>
+
+            
+        </div>
+            
+        
+
+    </div>
+
 
 
 

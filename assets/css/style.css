@@ -240,6 +240,32 @@ body{
    font-size: 12px;
 }
 
+.paginationContainer {
+
+    display:flex;
+    justify-content: center;
+    margin-bottom: 25px;
+
+}
+
+.pageButtons,
+.pageButtons a{
+    display: flex;
+    text-decoration: none;
+    margin-top: 20px;
+    align-items: center;
+
+    
+}
+
+.pageNumber {
+    color:#4285f4;
+    font-size: 15px;
+    margin-right: 6px;
+}
+
+
+
 
 
 
