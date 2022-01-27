@@ -35,7 +35,6 @@ class imageResultsProvider{
                                         WHERE (title LIKE :term
                                         OR alt LIKE :term)
                                         AND broken=0
-                                        ORDER BY clicks DESC 
                                         LIMIT :fromLimit , :pageSize ");
 
         $searchTerm = "%" . $term . "%";
@@ -68,9 +67,9 @@ class imageResultsProvider{
 
             $resultsHtml .= "<div class='gridItem image$count'>
 
-                                <a href ='$imageUrl'> 
+                                <a href ='$imageUrl' data-fancybox data-caption='$displayText'> 
                                     
-                                    <script >
+                                    <script > 
                                         $(document).ready(function(){
                                             
                                             loadImage(\"$imageUrl\", \"image$count\" );

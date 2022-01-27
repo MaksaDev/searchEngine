@@ -3,7 +3,7 @@ var timer;
 
 $(document).ready(function(){
     
-$(".result").on("click", function() {
+    $(".result").on("click", function() {
     console.log("I was clicked");
 
     var id = $(this).attr("data-linkId");
@@ -18,14 +18,14 @@ $(".result").on("click", function() {
 
 
     return false;
-});
+    });
 
 
-var grid = $(".imageResults");
+    var grid = $(".imageResults");
 
-grid.on("layoutComplete", function(){
+    grid.on("layoutComplete", function(){
     $(".gridItem img").css("visibility", "visible"); // masonry func.
-});
+    });
 
     grid.masonry({
 
@@ -35,9 +35,12 @@ grid.on("layoutComplete", function(){
         isInitLayout: false
        
     });
+
+   
+    
+    
+
 });
-
-
 
 function loadImage(src, className){
 
@@ -57,7 +60,10 @@ function loadImage(src, className){
 
     image.on("error", function(){
 
-        
+        $("." + className).remove();
+
+        $.post("ajax/setBroken.php",{src: src});
+
     });
 
     image.attr("src", src);
@@ -88,4 +94,5 @@ function increaseLinkClicks(linkId, url){
     });
 
 
-}
+};
+
